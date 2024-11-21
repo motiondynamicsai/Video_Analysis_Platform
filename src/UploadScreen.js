@@ -27,7 +27,7 @@ const UploadScreen = () => {
     formData.append("mode", mode);
     formData.append("group", group); // Add the selected group to the form data
 
-    const response = await fetch("http://mody:8000/signProcessDB/", {
+    const response = await fetch("https://mody.tail92517b.ts.net:8000/signProcessDB/", {
       method: "POST",
       body: formData,
     });

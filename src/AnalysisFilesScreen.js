@@ -7,12 +7,13 @@ function AnalysisFilesScreen() {
   const [subfolders, setSubfolders] = useState([]);
   const [currentSubfolder, setCurrentSubfolder] = useState(null);
   const [files, setFiles] = useState([]);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   // Fetch group list from the server
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const response = await fetch("http://mody:8000/groups/");
+        const response = await fetch("https://mody.tail92517b.ts.net:8000/groups/");
         if (!response.ok) {
           throw new Error(`Server error: ${response.status}`);
         }
@@ -29,7 +30,7 @@ function AnalysisFilesScreen() {
   // Fetch subfolders in a specific group
   const openGroup = async (groupName) => {
     try {
-      const response = await fetch(`http://mody:8000/groups/${groupName}/`);
+      const response = await fetch(`https://mody.tail92517b.ts.net:8000/groups/${groupName}/`);
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
@@ -45,7 +46,7 @@ function AnalysisFilesScreen() {
   const openSubfolder = async (subfolderName) => {
     try {
       const endpoint = subfolderName === "videos" ? "videos" : "jsons";
-      const response = await fetch(`http://mody:8000/groups/${currentGroup}/${endpoint}/`);
+      const response = await fetch(`https://mody.tail92517b.ts.net:8000/groups/${currentGroup}/${endpoint}/`);
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
@@ -60,7 +61,7 @@ function AnalysisFilesScreen() {
   // Download a specific file
   const downloadFile = async (fileId, fileName) => {
     try {
-      const response = await fetch(`http://mody:8000/files/${fileId}`);
+      const response = await fetch(`https://mody.tail92517b.ts.net:8000/files/${fileId}`);
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
@@ -80,8 +81,10 @@ function AnalysisFilesScreen() {
 
   // Download all files in the current subfolder
   const downloadAllFiles = async () => {
-    for (const file of files) {
-      await downloadFile(file.id, file.filename);
+    setDownloadProgress(0);
+    for (let i = 0; i < files.length; i++) {
+      await downloadFile(files[i].id, files[i].filename);
+      setDownloadProgress(Math.round(((i + 1) / files.length) * 100));
     }
   };
 
@@ -102,6 +105,13 @@ function AnalysisFilesScreen() {
                 </li>
               ))}
             </ul>
+            {downloadProgress > 0 && (
+              <div className="progress-bar-container">
+                <div className="progress-bar" style={{ width: `${downloadProgress}%` }}>
+                  {downloadProgress}%
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="subfolder-view">
