@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 import UploadScreen from "./UploadScreen";
 import AnalysisFilesScreen from "./AnalysisFilesScreen";
 import "./App.css";
@@ -19,6 +19,8 @@ function App() {
           <Routes>
             <Route path="/" element={<UploadScreen />} />
             <Route path="/analysis-files" element={<AnalysisFilesScreen />} />
+            {/* Default redirect */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
       </div>
