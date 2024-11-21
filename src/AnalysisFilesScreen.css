@@ -1,4 +1,4 @@
-/* AnalysisFilesScreen.css */
+/* Existing Styles */
 .analysis-files-screen {
   font-family: Arial, sans-serif;
   padding: 20px;
@@ -67,4 +67,59 @@ li {
   line-height: 20px;
   transition: width 0.3s;
 }
-  
+
+/* New Styles for Video Display */
+.video-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  max-height: 400px; /* Set height for scrollable box */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.video-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.video-item {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.download-button {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.download-button:hover {
+  background-color: #0056b3;
+}
+
+/* Scrollable lists for files, subfolders, and groups */
+.file-list, .subfolder-list, .group-list {
+  max-height: 400px; /* Set height for scrollable list */
+  overflow-y: auto;  /* Enable vertical scrolling */
+}
+
+/* Optionally, add some padding to the list container */
+.file-list, .subfolder-list, .group-list {
+  padding: 10px;
+}
