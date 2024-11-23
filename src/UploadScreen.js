@@ -1,31 +1,31 @@
 import React, { useState } from "react";
+import { Button, Progress, Radio, Upload, Typography, message } from "antd";
+import { UploadOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 const UploadScreen = () => {
   const [files, setFiles] = useState([]);
   const [uploadMessage, setUploadMessage] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [group, setGroup] = useState(""); // Track selected group
+  const [group, setGroup] = useState("");
 
-  const BATCH_SIZE = 1; // Number of files to process per batch
+  const BATCH_SIZE = 1;
 
-  // Handle file selection
-  const handleFileSelect = (event) => {
-    const selectedFiles = Array.from(event.target.files);
-    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+  const handleFileSelect = ({ file, fileList }) => {
+    setFiles(fileList);
   };
 
-  // Remove all files
   const removeAllFiles = () => {
     setFiles([]);
     setUploadProgress(0);
   };
 
-  // Process files in batches
   const processBatch = async (batch, mode, group) => {
     const formData = new FormData();
-    batch.forEach((file) => formData.append("files", file));
+    batch.forEach((file) => formData.append("files", file.originFileObj));
     formData.append("mode", mode);
-    formData.append("group", group); // Add the selected group to the form data
+    formData.append("group", group);
 
     const response = await fetch("https://mody.tail92517b.ts.net:8000/signProcessDB/", {
       method: "POST",
@@ -41,9 +41,8 @@ const UploadScreen = () => {
     return await response.json();
   };
 
-  // Handle file upload
   const handleUpload = async (mode) => {
-    if (files.length === 0 || !group) return; // Ensure a group is selected
+    if (files.length === 0 || !group) return;
 
     setUploadProgress(0);
     setUploadMessage("Videos sent! Analysing...");
@@ -62,206 +61,100 @@ const UploadScreen = () => {
       setUploadMessage(`Successfully uploaded all files in ${mode} mode`);
     } catch (err) {
       console.error("Error during batch upload:", err);
-      alert(`Error: ${err.message}`);
+      message.error(`Error: ${err.message}`);
     }
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Upload Your Files</h1>
+      <Title level={2}>Upload Your Files</Title>
 
-      <input
-        type="file"
-        accept="video/*,image/*"
+      <Upload
         multiple
+        beforeUpload={() => false}
         onChange={handleFileSelect}
-        style={styles.fileInput}
-      />
-
-      <ul style={styles.fileList}>
-        {files.map((file, index) => (
-          <li key={index} style={styles.fileItem}>
-            {file.name}
-          </li>
-        ))}
-      </ul>
+        fileList={files}
+        listType="text"
+        className="custom-upload-list"
+      >
+        <Button icon={<UploadOutlined />}>Select Files</Button>
+      </Upload>
 
       <div style={styles.groupSelection}>
-        <p style={styles.groupTitle}>Select Group:</p>
-        {["Group1", "Group2", "Group3"].map((groupName) => (
-          <label key={groupName} style={styles.groupLabel}>
-            <input
-              type="radio"
-              name="group"
-              value={groupName}
-              checked={group === groupName}
-              onChange={(e) => setGroup(e.target.value)}
-              style={styles.radioInput}
-            />
-            {groupName}
-          </label>
-        ))}
+        <Text strong>Select Group:</Text>
+        <Radio.Group onChange={(e) => setGroup(e.target.value)} value={group}>
+          {["Group1", "Group2", "Group3"].map((groupName) => (
+            <Radio key={groupName} value={groupName}>
+              {groupName}
+            </Radio>
+          ))}
+        </Radio.Group>
       </div>
 
       <div style={styles.buttonContainer}>
-        <button
-          style={files.length > 0 ? styles.button : styles.disabledButton}
+        <Button
+          type="primary"
           onClick={() => handleUpload("wholebody")}
           disabled={files.length === 0 || !group}
         >
           Analyse Whole Body
-        </button>
-        <button
-          style={files.length > 0 ? styles.button : styles.disabledButton}
+        </Button>
+        <Button
+          type="primary"
           onClick={() => handleUpload("pose3d")}
           disabled={files.length === 0 || !group}
         >
           Analyse 3D Pose
-        </button>
-        <button
-          style={files.length > 0 ? styles.removeButton : styles.disabledButton}
+        </Button>
+        <Button
+          type="danger"
           onClick={removeAllFiles}
           disabled={files.length === 0}
         >
           Remove All Files
-        </button>
+        </Button>
       </div>
 
-      {uploadMessage && <p style={styles.successMessage}>{uploadMessage}</p>}
+      {uploadMessage && <Text type="success">{uploadMessage}</Text>}
 
       {uploadProgress >= 0 && (
-        <div style={styles.progressBarContainer}>
-          <div style={styles.progressBarWrapper}>
-            <div
-              style={{
-                ...styles.progressBar,
-                width: `${uploadProgress}%`,
-              }}
-            />
-          </div>
-          <p style={styles.progressText}>{uploadProgress}%</p>
-        </div>
+        <Progress percent={uploadProgress} style={styles.progressBar} />
       )}
     </div>
   );
 };
 
 const styles = {
-    container: {
-      padding: "20px",
-      textAlign: "center",
-      fontFamily: "'Roboto', sans-serif",
-      maxWidth: "600px",
-      margin: "0 auto",
-    },
-    title: {
-      fontSize: "28px",
-      fontWeight: "bold",
-      marginBottom: "20px",
-      color: "#333",
-    },
-    fileInput: {
-      padding: "10px",
-      marginBottom: "20px",
-      fontSize: "16px",
-    },
-    fileList: {
-      listStyleType: "none",
-      padding: "10px",
-      marginTop: "10px",
-      marginBottom: "20px",
-      color: "#555",
-      textAlign: "left",
-      maxHeight: "150px", // Set max height for the list
-      overflowY: "auto", // Enable vertical scrolling
-      border: "1px solid #ddd", // Optional: Add a border for clarity
-      borderRadius: "5px",
-      backgroundColor: "#f9f9f9", // Light background for better visibility
-    },
-    fileItem: {
-      marginBottom: "5px",
-      padding: "5px",
-      borderBottom: "1px solid #eee", // Optional: Divider between files
-      fontSize: "14px",
-    },
-    groupSelection: {
-      marginTop: "20px",
-      textAlign: "left",
-    },
-    groupTitle: {
-      fontWeight: "bold",
-      marginBottom: "10px",
-      color: "#444",
-    },
-    groupLabel: {
-      display: "block",
-      marginBottom: "5px",
-      color: "#555",
-      cursor: "pointer",
-    },
-    radioInput: {
-      marginRight: "10px",
-    },
-    buttonContainer: {
-      marginTop: "20px",
-      display: "flex",
-      justifyContent: "center",
-      gap: "10px",
-    },
-    button: {
-      backgroundColor: "#0a7ea4",
-      color: "white",
-      border: "none",
-      padding: "10px 20px",
-      cursor: "pointer",
-      borderRadius: "5px",
-      fontSize: "16px",
-      transition: "background-color 0.3s ease",
-    },
-    removeButton: {
-      backgroundColor: "#ff4c4c",
-      color: "white",
-      border: "none",
-      padding: "10px 20px",
-      cursor: "pointer",
-      borderRadius: "5px",
-      fontSize: "16px",
-      transition: "background-color 0.3s ease",
-    },
-    disabledButton: {
-      backgroundColor: "#cccccc",
-      color: "#666666",
-      border: "none",
-      padding: "10px 20px",
-      borderRadius: "5px",
-      cursor: "not-allowed",
-    },
-    successMessage: {
-      color: "#28a745",
-      marginTop: "20px",
-      fontSize: "16px",
-    },
-    progressBarContainer: {
-      marginTop: "20px",
-      textAlign: "center",
-    },
-    progressBarWrapper: {
-      backgroundColor: "#e0e0e0",
-      borderRadius: "10px",
-      overflow: "hidden",
-      height: "20px",
-      width: "100%",
-    },
-    progressBar: {
-      backgroundColor: "#4caf50",
-      height: "100%",
-      transition: "width 0.3s ease",
-    },
-    progressText: {
-      marginTop: "10px",
-      fontSize: "16px",
-      fontWeight: "bold",
-    },  
+  container: {
+    padding: "20px",
+    textAlign: "center",
+    fontFamily: "'Roboto', sans-serif",
+    maxWidth: "600px",
+    margin: "0 auto",
+  },
+  groupSelection: {
+    marginTop: "20px",
+    textAlign: "left",
+  },
+  buttonContainer: {
+    marginTop: "20px",
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px",
+  },
+  progressBar: {
+    marginTop: "20px",
+  },
 };
+
+// Add this CSS to the same file or include it in your project's stylesheet.
+const customStyles = document.createElement("style");
+customStyles.innerHTML = `
+  .custom-upload-list .ant-upload-list {
+    max-height: 300px; /* Set a max height for the list */
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+`;
+document.head.appendChild(customStyles);
 
 export default UploadScreen;

@@ -61,30 +61,59 @@ function AnalysisFilesScreen() {
   // Download a specific file
   const downloadFile = async (fileId, fileName) => {
     try {
-      const response = await fetch(`https://mody.tail92517b.ts.net:8000/files/${fileId}`);
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
+        const response = await fetch(`https://mody.tail92517b.ts.net:8000/files/${fileId}`);
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
     } catch (error) {
-      alert("Failed to download file: " + error.message);
+        alert("Failed to download file: " + error.message);
     }
-  };
+};
 
-  // Download all files in the current subfolder
-  const downloadAllFiles = async () => {
-    setDownloadProgress(0);
-    for (let i = 0; i < files.length; i++) {
-      await downloadFile(files[i].id, files[i].filename);
-      setDownloadProgress(Math.round(((i + 1) / files.length) * 100));
+  // Download all files in the current subfolder (optimized with parallel downloads)
+const downloadAllFiles = async () => {
+    try {
+      setDownloadProgress(0);
+  
+      const totalFiles = files.length;
+      if (totalFiles === 0) {
+        alert("No files to download.");
+        return;
+      }
+  
+      // Track completed downloads
+      let completed = 0;
+  
+      // Function to update progress
+      const updateProgress = () => {
+        completed++;
+        setDownloadProgress(Math.round((completed / totalFiles) * 100));
+      };
+  
+      // Download files concurrently
+      await Promise.all(
+        files.map(async (file) => {
+          try {
+            await downloadFile(file.id, file.filename);
+            updateProgress();
+          } catch (error) {
+            console.error(`Failed to download file: ${file.filename}`, error);
+          }
+        })
+      );
+  
+    } catch (error) {
+      console.error("Error during download all files:", error);
+      alert("An error occurred while downloading all files.");
     }
   };
 
