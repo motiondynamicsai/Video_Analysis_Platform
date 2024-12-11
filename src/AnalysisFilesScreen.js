@@ -58,64 +58,78 @@ function AnalysisFilesScreen() {
     }
   };
 
-  // Download a specific file
-  const downloadFile = async (fileId, fileName) => {
-    try {
-        const response = await fetch(`https://mody.tail92517b.ts.net:8000/files/${fileId}`);
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-    } catch (error) {
-        alert("Failed to download file: " + error.message);
-    }
+  // Reusable function for batching downloads
+const downloadBatch = async (batch, updateProgress) => {
+  await Promise.all(
+    batch.map(async (file) => {
+      try {
+        await downloadFile(file.id, file.filename);
+        updateProgress();
+      } catch (error) {
+        console.error(`Failed to download file: ${file.filename}`, error);
+      }
+    })
+  );
 };
 
-  // Download all files in the current subfolder (optimized with parallel downloads)
+// Download all files with dynamic concurrency control
 const downloadAllFiles = async () => {
-    try {
-      setDownloadProgress(0);
-  
-      const totalFiles = files.length;
-      if (totalFiles === 0) {
-        alert("No files to download.");
-        return;
-      }
-  
-      // Track completed downloads
-      let completed = 0;
-  
-      // Function to update progress
-      const updateProgress = () => {
-        completed++;
-        setDownloadProgress(Math.round((completed / totalFiles) * 100));
-      };
-  
-      // Download files concurrently
-      await Promise.all(
-        files.map(async (file) => {
-          try {
-            await downloadFile(file.id, file.filename);
-            updateProgress();
-          } catch (error) {
-            console.error(`Failed to download file: ${file.filename}`, error);
-          }
-        })
-      );
-  
-    } catch (error) {
-      console.error("Error during download all files:", error);
-      alert("An error occurred while downloading all files.");
+  try {
+    setDownloadProgress(0);
+
+    const totalFiles = files.length;
+    if (totalFiles === 0) {
+      alert("No files to download.");
+      return;
     }
-  };
+
+    // Track completed downloads
+    let completed = 0;
+
+    // Function to update progress efficiently
+    const updateProgress = () => {
+      completed++;
+      const progress = Math.round((completed / totalFiles) * 100);
+      setDownloadProgress(progress);
+    };
+
+    // Dynamic concurrency control
+    const MAX_CONCURRENT_DOWNLOADS = navigator.connection?.effectiveType === "4g" ? 10 : 5;
+
+    // Process files in batches
+    for (let i = 0; i < files.length; i += MAX_CONCURRENT_DOWNLOADS) {
+      const batch = files.slice(i, i + MAX_CONCURRENT_DOWNLOADS);
+      await downloadBatch(batch, updateProgress);
+    }
+
+    alert("All files downloaded successfully!");
+  } catch (error) {
+    console.error("Error during download all files:", error);
+    alert("An error occurred while downloading all files.");
+  }
+};
+
+// Single file download function
+const downloadFile = async (fileId, fileName) => {
+  try {
+    const response = await fetch(`https://mody.tail92517b.ts.net:8000/files/${fileId}`);
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error(`Failed to download file (${fileName}): ${error.message}`);
+  }
+};
+
 
   return (
     <div className="analysis-files-screen">
@@ -134,13 +148,11 @@ const downloadAllFiles = async () => {
                 </li>
               ))}
             </ul>
-            {downloadProgress > 0 && (
-              <div className="progress-bar-container">
-                <div className="progress-bar" style={{ width: `${downloadProgress}%` }}>
-                  {downloadProgress}%
-                </div>
+            <div className="progress-bar-container">
+              <div className="progress-bar" style={{ width: `${downloadProgress}%` }}>
+                {downloadProgress}%
               </div>
-            )}
+            </div>
           </div>
         ) : (
           <div className="subfolder-view">
