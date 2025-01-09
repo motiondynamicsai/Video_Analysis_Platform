@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Progress, Radio, Upload, Typography, message } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
+import axios from "axios";
 
 const { Title, Text } = Typography;
 
@@ -21,24 +22,27 @@ const UploadScreen = () => {
     setUploadProgress(0);
   };
 
-  const processBatch = async (batch, mode, group) => {
+  const processBatch = async (batch, mode) => {
     const formData = new FormData();
-    batch.forEach((file) => formData.append("files", file.originFileObj));
+    batch.forEach((file) => formData.append("file", file.originFileObj));
     formData.append("mode", mode);
-    formData.append("group", group);
 
-    const response = await fetch("https://mody.tail92517b.ts.net:8000/signProcessDB/", {
-      method: "POST",
-      body: formData,
-    });
+    const token = localStorage.getItem("access_token");
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    try {
+      const response = await axios.post("https://mody.tail92517b.ts.net:8000/process3toDB/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      const errorText = error.response?.data?.detail || "Unknown error";
       console.error("Batch upload failed:", errorText);
-      throw new Error(`Batch failed: ${errorText || "Unknown error"}`);
+      throw new Error(`Batch failed: ${errorText}`);
     }
-
-    return await response.json();
   };
 
   const handleUpload = async (mode) => {
@@ -54,7 +58,7 @@ const UploadScreen = () => {
         const end = Math.min(start + BATCH_SIZE, files.length);
         const batch = files.slice(start, end);
 
-        await processBatch(batch, mode, group);
+        await processBatch(batch, mode);
         setUploadProgress(Math.round(((i + 1) / totalBatches) * 100));
       }
 
