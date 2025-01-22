@@ -8,6 +8,7 @@ const { Title, Text } = Typography;
 const HomeScreen = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const username = localStorage.getItem("username") || "";
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -49,7 +50,7 @@ const HomeScreen = () => {
 
   return (
     <div style={styles.container}>
-      <Title level={2} style={styles.title}>Video Feed</Title>
+      <Title level={2} style={styles.title}>Video Feed {username}</Title>
       <List
         loading={loading}
         grid={{ gutter: 16, column: 1 }}
@@ -59,12 +60,12 @@ const HomeScreen = () => {
             <Card style={styles.card} hoverable>
               <div style={styles.header}>
                 <Avatar size="large" icon={<UserOutlined />} />
-                <Text strong style={styles.username}>User Name</Text>
+                <Text strong style={styles.username}>{username}</Text>
               </div>
               <VideoPlayer videoId={video.video_id} filename={video.filename} fetchVideoBlob={fetchVideoBlob} />
               <div style={styles.actions}>
                 <Space>
-                  <Button type="link" icon={<PlayCircleOutlined />} style={styles.actionButton}>Play</Button>
+                  <Button type="link" icon={<PlayCircleOutlined />} style={styles.actionButton}>See Analysis</Button>
                   <Button type="link" icon={<LikeOutlined />} style={styles.actionButton}>Like</Button>
                   <Button type="link" icon={<ShareAltOutlined />} style={styles.actionButton}>Share</Button>
                 </Space>

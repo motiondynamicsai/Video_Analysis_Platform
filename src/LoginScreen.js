@@ -10,17 +10,18 @@ const LoginScreen = ({ onLogin }) => {
 
   const handleLogin = async () => {
     try {
-        const response = await axios.post("https://mody.tail92517b.ts.net:8000/auth/login/", {
-            email: email.trim().toLowerCase(),
-            password,
-        });
-        const { access_token } = response.data;
-        localStorage.setItem("access_token", access_token);
-        onLogin();
+      const response = await axios.post("https://mody.tail92517b.ts.net:8000/auth/login/", {
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      const { access_token, username } = response.data;
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("username", username);
+      onLogin();
     } catch (error) {
-        message.error("Login failed: " + error.response.data.detail);
+      message.error("Login failed: " + (error.response?.data?.detail || "Unknown error"));
     }
-};
+  };
 
   return (
     <div style={styles.container}>

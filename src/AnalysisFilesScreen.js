@@ -31,43 +31,50 @@ const AnalysisFilesScreen = () => {
     fetchFiles();
   }, []);
 
-  const downloadFile = async (fileId, filename) => {
+  const handleDownload = async (fileId, filename, contentType) => {
     const token = localStorage.getItem("access_token");
-    console.log("Downloading file:", { fileId, filename });
-
     try {
-        const response = await axios.get(`https://mody.tail92517b.ts.net:8000/files/${fileId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            responseType: "blob", // Ensure binary data
-        });
+      const response = await axios.get(`https://mody.tail92517b.ts.net:8000/files/${fileId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
 
-        console.log("Response headers:", response.headers);
-
-        const blob = new Blob([response.data]);
-        console.log("Blob type:", blob.type);
-
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+      const blob = new Blob([response.data], { type: contentType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error("Error downloading file:", error);
-        message.error(`Failed to download file: ${error.response?.data?.detail || "Unknown error"}`);
+      console.error("Error downloading file:", error);
+      message.error(`Failed to download file: ${error.response?.data?.detail || "Unknown error"}`);
     }
-};
+  };
 
-  
-  
+  const downloadAll = async (type) => {
+    for (const file of files) {
+      if (type === "videos" && file.video_id) {
+        await handleDownload(file.video_id, file.processed_filename, "video/mp4");
+      } else if (type === "jsons" && file.json_id) {
+        await handleDownload(file.json_id, file.json_filename, "application/json");
+      }
+    }
+  };
 
   return (
     <div style={styles.container}>
       <Title level={2}>Your Files</Title>
+      <Button type="primary" onClick={() => downloadAll("videos")} style={styles.downloadAllButton}>
+        Download All Videos
+      </Button>
+      <Button type="primary" onClick={() => downloadAll("jsons")} style={styles.downloadAllButton}>
+        Download All JSONs
+      </Button>
       <List
         loading={loading}
         grid={{ gutter: 16, column: 1 }}
@@ -83,19 +90,19 @@ const AnalysisFilesScreen = () => {
               <br />
               <Text strong>Uploaded at:</Text> {file.uploaded_at || "Unknown"}
               <div style={styles.buttonContainer}>
-              <Button
-                type="primary"
-                onClick={() => downloadFile(file.video_id, file.processed_filename)}
-                style={styles.downloadButton}
-              >
-               Download Video
-              </Button>
-              <Button
-                type="primary"
-                onClick={() => downloadFile(file.json_id, file.json_filename)}
-                style={styles.downloadButton}
-              >
-               Download JSON
+                <Button
+                  type="primary"
+                  onClick={() => handleDownload(file.video_id, file.processed_filename, "video/mp4")}
+                  style={styles.downloadButton}
+                >
+                  Download Video
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => handleDownload(file.json_id, file.json_filename, "application/json")}
+                  style={styles.downloadButton}
+                >
+                  Download JSON
                 </Button>
               </div>
             </Card>
@@ -125,6 +132,10 @@ const styles = {
   },
   downloadButton: {
     marginLeft: "10px",
+  },
+  downloadAllButton: {
+    marginBottom: "20px",
+    marginRight: "10px",
   },
 };
 
