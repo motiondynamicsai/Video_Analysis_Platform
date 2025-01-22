@@ -4,6 +4,7 @@ import UploadScreen from "./UploadScreen";
 import AnalysisFilesScreen from "./AnalysisFilesScreen";
 import LoginScreen from "./LoginScreen";
 import SignUpScreen from "./SignUpScreen";
+import HomeScreen from "./HomeScreen";
 import "./App.css";
 
 function App() {
@@ -31,7 +32,8 @@ function App() {
         <header className="app-header">
           <h1>Video Analysis Platform</h1>
           <nav>
-            <Link to="/">Upload</Link>
+            <Link to="/">Home</Link>
+            <Link to="/upload">Upload</Link>
             <Link to="/analysis-files">Analysis Files</Link>
             {isAuthenticated ? (
               <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
@@ -49,7 +51,8 @@ function App() {
             <Route path="/signup" element={<SignUpScreen />} />
             {isAuthenticated ? (
               <>
-                <Route path="/" element={<UploadScreen />} />
+                <Route path="/" element={<HomeScreen />} />
+                <Route path="/upload" element={<UploadScreen />} />
                 <Route path="/analysis-files" element={<AnalysisFilesScreen />} />
               </>
             ) : (

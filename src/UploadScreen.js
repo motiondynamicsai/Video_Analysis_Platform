@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Progress, Radio, Upload, Typography, message } from "antd";
+import { Button, Progress, Upload, Typography, message } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import axios from "axios";
 
@@ -9,7 +9,6 @@ const UploadScreen = () => {
   const [files, setFiles] = useState([]);
   const [uploadMessage, setUploadMessage] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [group, setGroup] = useState("");
 
   const BATCH_SIZE = 1;
 
@@ -46,7 +45,7 @@ const UploadScreen = () => {
   };
 
   const handleUpload = async (mode) => {
-    if (files.length === 0 || !group) return;
+    if (files.length === 0) return;
 
     setUploadProgress(0);
     setUploadMessage("Videos sent! Analysing...");
@@ -84,29 +83,18 @@ const UploadScreen = () => {
         <Button icon={<UploadOutlined />}>Select Files</Button>
       </Upload>
 
-      <div style={styles.groupSelection}>
-        <Text strong>Select Group:</Text>
-        <Radio.Group onChange={(e) => setGroup(e.target.value)} value={group}>
-          {["Group1", "Group2", "Group3"].map((groupName) => (
-            <Radio key={groupName} value={groupName}>
-              {groupName}
-            </Radio>
-          ))}
-        </Radio.Group>
-      </div>
-
       <div style={styles.buttonContainer}>
         <Button
           type="primary"
           onClick={() => handleUpload("wholebody")}
-          disabled={files.length === 0 || !group}
+          disabled={files.length === 0}
         >
           Analyse Whole Body
         </Button>
         <Button
           type="primary"
           onClick={() => handleUpload("pose3d")}
-          disabled={files.length === 0 || !group}
+          disabled={files.length === 0}
         >
           Analyse 3D Pose
         </Button>
