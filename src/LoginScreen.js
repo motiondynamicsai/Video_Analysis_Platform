@@ -7,9 +7,21 @@ const { Title } = Typography;
 const LoginScreen = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
 
   const handleLogin = async () => {
+    if (!validateEmail(email)) {
+      message.error('Please enter a valid email address');
+      return;
+    }
+    
     try {
+      setLoading(true);
       const response = await axios.post("https://mody.tail92517b.ts.net:8000/auth/login/", {
         email: email.trim().toLowerCase(),
         password,
@@ -20,13 +32,15 @@ const LoginScreen = ({ onLogin }) => {
       onLogin();
     } catch (error) {
       message.error("Login failed: " + (error.response?.data?.detail || "Unknown error"));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <Title level={2}>Login</Title>
-      <Form style={styles.form}>
+    <>
+      <Title level={4} style={{ marginBottom: 24 }}>Existing Users</Title>
+      <Form layout="vertical">
         <Form.Item>
           <Input
             type="email"
@@ -43,25 +57,19 @@ const LoginScreen = ({ onLogin }) => {
           />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" onClick={handleLogin} block>
+          <Button 
+            type="primary" 
+            onClick={handleLogin} 
+            block
+            loading={loading}
+            style={{ height: 42 }}
+          >
             Login
           </Button>
         </Form.Item>
       </Form>
-    </div>
+    </>
   );
-};
-
-const styles = {
-  container: {
-    padding: "20px",
-    textAlign: "center",
-    maxWidth: "400px",
-    margin: "0 auto",
-  },
-  form: {
-    width: "100%",
-  },
 };
 
 export default LoginScreen;

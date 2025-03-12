@@ -70,63 +70,66 @@ const UploadScreen = () => {
 
   return (
     <div style={styles.container}>
-      <Title level={2}>Upload Your Files</Title>
+      <Title level={4} style={{ marginBottom: 24 }}>Upload New Videos</Title>
+      <div style={styles.uploadArea}>
+        <Upload
+          multiple
+          beforeUpload={() => false}
+          onChange={handleFileSelect}
+          fileList={files}
+          listType="text"
+          className="custom-upload-list"
+        >
+          <Button icon={<UploadOutlined />}>Select Files</Button>
+        </Upload>
 
-      <Upload
-        multiple
-        beforeUpload={() => false}
-        onChange={handleFileSelect}
-        fileList={files}
-        listType="text"
-        className="custom-upload-list"
-      >
-        <Button icon={<UploadOutlined />}>Select Files</Button>
-      </Upload>
+        <div style={styles.buttonContainer}>
+          <Button
+            type="primary"
+            onClick={() => handleUpload("wholebody")}
+            disabled={files.length === 0}
+          >
+            Analyse Whole Body
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => handleUpload("pose3d")}
+            disabled={files.length === 0}
+          >
+            Analyse 3D Pose
+          </Button>
+          <Button
+            type="danger"
+            onClick={removeAllFiles}
+            disabled={files.length === 0}
+          >
+            Remove All Files
+          </Button>
+        </div>
 
-      <div style={styles.buttonContainer}>
-        <Button
-          type="primary"
-          onClick={() => handleUpload("wholebody")}
-          disabled={files.length === 0}
-        >
-          Analyse Whole Body
-        </Button>
-        <Button
-          type="primary"
-          onClick={() => handleUpload("pose3d")}
-          disabled={files.length === 0}
-        >
-          Analyse 3D Pose
-        </Button>
-        <Button
-          type="danger"
-          onClick={removeAllFiles}
-          disabled={files.length === 0}
-        >
-          Remove All Files
-        </Button>
+        {uploadMessage && <Text type="success">{uploadMessage}</Text>}
+
+        {uploadProgress >= 0 && (
+          <Progress percent={uploadProgress} style={styles.progressBar} />
+        )}
       </div>
-
-      {uploadMessage && <Text type="success">{uploadMessage}</Text>}
-
-      {uploadProgress >= 0 && (
-        <Progress percent={uploadProgress} style={styles.progressBar} />
-      )}
     </div>
   );
 };
 
 const styles = {
   container: {
-    padding: "20px",
-    textAlign: "center",
-    fontFamily: "'Roboto', sans-serif",
-    maxWidth: "600px",
-    margin: "0 auto",
+    height: '100%',
+    padding: 24,
+    background: '#fff',
+    borderRadius: 8,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
   },
-  groupSelection: {
-    marginTop: "20px",
-    textAlign: "left",
+  uploadArea: {
+    height: 'calc(100% - 120px)',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center'
   },
   buttonContainer: {
     marginTop: "20px",

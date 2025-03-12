@@ -9,12 +9,11 @@ const HomeScreen = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const username = localStorage.getItem("username") || "";
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     const fetchVideos = async () => {
       setLoading(true);
-      const token = localStorage.getItem("access_token");
-
       try {
         const response = await axios.get("https://mody.tail92517b.ts.net:8000/videoFiles/", {
           headers: {
@@ -30,28 +29,13 @@ const HomeScreen = () => {
     };
 
     fetchVideos();
-  }, []);
-
-  const fetchVideoBlob = async (videoId) => {
-    const token = localStorage.getItem("access_token");
-    try {
-      const response = await axios.get(`https://mody.tail92517b.ts.net:8000/stream_video/${videoId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        responseType: 'blob'
-      });
-      return URL.createObjectURL(response.data);
-    } catch (error) {
-      message.error("Failed to load video: " + (error.response?.data?.detail || "Unknown error"));
-      return null;
-    }
-  };
+  }, [token]);
 
   return (
     <div style={styles.container}>
-      <Title level={2} style={styles.title}>Video Feed {username}</Title>
+      <Title level={4} style={{ marginBottom: 24 }}>Recent Videos</Title>
       <List
+        style={styles.list}
         loading={loading}
         grid={{ gutter: 16, column: 1 }}
         dataSource={videos}
@@ -62,7 +46,7 @@ const HomeScreen = () => {
                 <Avatar size="large" icon={<UserOutlined />} />
                 <Text strong style={styles.username}>{username}</Text>
               </div>
-              <VideoPlayer videoId={video.video_id} filename={video.filename} fetchVideoBlob={fetchVideoBlob} />
+              <VideoPlayer videoId={video.video_id} />
               <div style={styles.actions}>
                 <Space>
                   <Button type="link" icon={<PlayCircleOutlined />} style={styles.actionButton}>See Analysis</Button>
@@ -78,36 +62,62 @@ const HomeScreen = () => {
   );
 };
 
-const VideoPlayer = ({ videoId, filename, fetchVideoBlob }) => {
+const VideoPlayer = ({ videoId }) => {
   const [videoSrc, setVideoSrc] = useState(null);
 
   useEffect(() => {
-    const loadVideo = async () => {
-      const src = await fetchVideoBlob(videoId);
-      setVideoSrc(src);
+    const fetchVideo = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        message.error("No access token found.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://mody.tail92517b.ts.net:8000/stream_video/${videoId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch video");
+        }
+
+        const blob = await response.blob();
+        setVideoSrc(URL.createObjectURL(blob));
+      } catch (error) {
+        message.error("Failed to load video: " + error.message);
+      }
     };
-    loadVideo();
-  }, [videoId, fetchVideoBlob]);
+
+    fetchVideo();
+
+    return () => {
+      if (videoSrc) URL.revokeObjectURL(videoSrc);
+    };
+  }, [videoId]);
 
   return (
     <div style={styles.videoContainer}>
-      <video controls width="100%"  src={videoSrc} style={styles.video} />
-      <Text style={styles.filename}>{filename}</Text>
+      {videoSrc ? (
+        <video controls width="100%" style={styles.video} src={videoSrc} />
+      ) : (
+        <p>Loading video...</p>
+      )}
     </div>
   );
 };
 
 const styles = {
   container: {
-    padding: "20px",
-    maxWidth: "800px",
-    margin: "0 auto",
-    backgroundColor: "#f0f2f5",
+    height: '100%',
+    padding: 24,
+    background: '#fff',
+    borderRadius: 8,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
   },
-  title: {
-    textAlign: "center",
-    marginBottom: "20px",
-    color: "#333",
+  list: {
+    height: 'calc(100% - 64px)',
+    overflowY: 'auto',
   },
   card: {
     borderRadius: "8px",
@@ -134,12 +144,6 @@ const styles = {
     borderRadius: "8px",
     maxHeight: "600px",
   },
-  filename: {
-    display: "block",
-    textAlign: "center",
-    marginTop: "5px",
-    color: "#888",
-  },
   actions: {
     display: "flex",
     justifyContent: "center",
@@ -151,4 +155,4 @@ const styles = {
   },
 };
 
-export default HomeScreen; 
+export default HomeScreen;

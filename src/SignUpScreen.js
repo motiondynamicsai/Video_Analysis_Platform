@@ -28,9 +28,9 @@ const SignUpScreen = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <Title level={2}>Sign Up</Title>
-      <Form style={styles.form}>
+    <>
+      <Title level={4} style={{ marginBottom: 24 }}>New Users</Title>
+      <Form layout="vertical">
         <Form.Item>
           <Input
             placeholder="Username"
@@ -59,20 +59,8 @@ const SignUpScreen = () => {
           </Button>
         </Form.Item>
       </Form>
-    </div>
+    </>
   );
-};
-
-const styles = {
-  container: {
-    padding: "20px",
-    textAlign: "center",
-    maxWidth: "400px",
-    margin: "0 auto",
-  },
-  form: {
-    width: "100%",
-  },
 };
 
 export default SignUpScreen;

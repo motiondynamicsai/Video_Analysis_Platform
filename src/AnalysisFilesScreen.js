@@ -7,11 +7,11 @@ const { Title, Text } = Typography;
 const AnalysisFilesScreen = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     const fetchFiles = async () => {
       setLoading(true);
-      const token = localStorage.getItem("access_token");
 
       try {
         // Fetch files metadata from the backend

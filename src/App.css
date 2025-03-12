@@ -10,16 +10,7 @@ body {
 
 /* Header Styles */
 .app-header {
-  background-color: #5a67d8;
-  color: white;
-  text-align: center;
-  padding: 2rem 1rem;
-  border-bottom: 4px solid #434190;
-}
-
-.app-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  display: none;
 }
 
 /* Main Content */
@@ -133,4 +124,117 @@ nav a {
 
 nav a:hover {
   text-decoration: underline;
+}
+
+/* Add these new styles */
+.ant-layout-sider {
+  position: fixed;
+  height: 100vh;
+  z-index: 2;
+}
+
+.ant-layout-content {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-left: 240px !important;
+}
+
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    transform: translateX(-100%);
+  }
+  
+  .ant-layout-sider.collapsed {
+    transform: translateX(0);
+  }
+  
+  .ant-layout-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Add username display styles */
+.username-display {
+  padding: 0 16px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Remove old styles and add these */
+.ant-layout {
+  background: #f8f9fa;
+}
+
+.ant-menu-item {
+  margin: 8px 0 !important;
+  border-radius: 4px !important;
+}
+
+.ant-card {
+  transition: transform 0.2s;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
+}
+
+.ant-btn-primary {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+.ant-progress-line {
+  width: 80%;
+  margin: 0 auto;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .username-display {
+    max-width: 120px;
+    font-size: 14px;
+  }
+  
+  header {
+    padding: 0 16px !important;
+  }
+  
+  .mobile-menu-button {
+    left: 8px;
+    top: 12px;
+  }
+}
+
+:root {
+  --primary-color: #1890ff;
+  --secondary-color: #f8f9fa;
+  --border-radius: 8px;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s, opacity 0.2s, transform 0.2s;
+}
+
+/* Enhanced buttons */
+.ant-btn {
+  border-radius: var(--border-radius) !important;
+  padding: 0 20px !important;
+  height: 38px !important;
+}
+
+/* Better form elements */
+.ant-input {
+  border-radius: var(--border-radius) !important;
+  padding: 8px 12px !important;
+}
+
+/* Professional card styling */
+.ant-card {
+  border-radius: var(--border-radius) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
 }
