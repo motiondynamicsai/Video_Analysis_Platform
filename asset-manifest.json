@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/Video_Analysis_Platform/static/css/main.27975e8c.css",
-    "main.js": "/Video_Analysis_Platform/static/js/main.c22bd0e8.js",
+    "main.css": "/Video_Analysis_Platform/static/css/main.98bf8c2e.css",
+    "main.js": "/Video_Analysis_Platform/static/js/main.5a5046a6.js",
     "static/js/453.7e542b3c.chunk.js": "/Video_Analysis_Platform/static/js/453.7e542b3c.chunk.js",
     "index.html": "/Video_Analysis_Platform/index.html",
-    "main.27975e8c.css.map": "/Video_Analysis_Platform/static/css/main.27975e8c.css.map",
-    "main.c22bd0e8.js.map": "/Video_Analysis_Platform/static/js/main.c22bd0e8.js.map",
+    "main.98bf8c2e.css.map": "/Video_Analysis_Platform/static/css/main.98bf8c2e.css.map",
+    "main.5a5046a6.js.map": "/Video_Analysis_Platform/static/js/main.5a5046a6.js.map",
     "453.7e542b3c.chunk.js.map": "/Video_Analysis_Platform/static/js/453.7e542b3c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.27975e8c.css",
-    "static/js/main.c22bd0e8.js"
+    "static/css/main.98bf8c2e.css",
+    "static/js/main.5a5046a6.js"
   ]
 }
