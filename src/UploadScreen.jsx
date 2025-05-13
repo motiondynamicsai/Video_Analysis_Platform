@@ -27,24 +27,27 @@ const UploadScreen = () => {
     const formData = new FormData();
     batch.forEach(file => formData.append("file", file.originFileObj));
     formData.append("mode", mode);
-
+  
     const token = localStorage.getItem("access_token");
-
+  
     try {
-      const { data } = await axios.post(`${API_BASE_URL}/process3toDB/`, formData, {
+      const { data } = await axios.post(`${API_BASE_URL}/api/video/upload`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       return data;
     } catch (error) {
-      const errorText = error.response?.data?.detail || "Unknown error";
-      console.error("Batch upload failed:", errorText);
-      throw new Error(`Batch failed: ${errorText}`);
+      console.error("Batch upload failed:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      throw new Error(`Batch failed: ${error.response?.data?.detail || error.message}`);
     }
   };
+  
 
   const handleUpload = async (mode) => {
     if (files.length === 0) return;

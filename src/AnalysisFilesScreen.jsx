@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { message } from "antd";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -8,32 +9,28 @@ const AnalysisFilesScreen = () => {
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("access_token");
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      setLoading(true);
-      try {
-        const { data } = await axios.get(`${API_BASE_URL}/files/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setFiles(data);
-      } catch (error) {
-        console.error("Failed to fetch files:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchFiles = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/files/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFiles(data);
+    } catch (error) {
+      console.error("Failed to fetch files:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchFiles();
   }, [token]);
 
   const handleDownload = async (fileId, filename, contentType) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/files/${fileId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         responseType: "blob",
       });
 
@@ -48,6 +45,28 @@ const AnalysisFilesScreen = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading file:", error);
+      message.error("Download failed");
+    }
+  };
+
+  const handleDeleteBoth = async (videoId, jsonId) => {
+    try {
+      if (videoId) {
+        await axios.delete(`${API_BASE_URL}/files/${videoId}?type=video`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      if (jsonId) {
+        await axios.delete(`${API_BASE_URL}/files/${jsonId}?type=json`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      message.success("Files deleted successfully");
+      await fetchFiles(); // force sync from backend
+    } catch (error) {
+      console.error("Error deleting files:", error);
+      message.error("Failed to delete files");
     }
   };
 
@@ -112,7 +131,7 @@ const AnalysisFilesScreen = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 mt-3">
+              <div className="flex flex-wrap gap-3 mt-3">
                 <button
                   onClick={() => handleDownload(video_id, processed_filename, "video/mp4")}
                   className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
@@ -124,6 +143,12 @@ const AnalysisFilesScreen = () => {
                   className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition"
                 >
                   Download JSON
+                </button>
+                <button
+                  onClick={() => handleDeleteBoth(video_id, json_id)}
+                  className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition"
+                >
+                  Delete Files
                 </button>
               </div>
             </div>

@@ -89,33 +89,28 @@ const Action = ({ icon, label }) => (
 
 const VideoPlayer = ({ videoId }) => {
   const [videoSrc, setVideoSrc] = useState(null);
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
-    const fetchVideo = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
-
+    const fetchSignedUrl = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/stream_video/${videoId}`, {
+        const response = await axios.get(`${API_BASE_URL}/video_url?videoId=${videoId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error("Failed to fetch video");
-        const blob = await response.blob();
-        setVideoSrc(URL.createObjectURL(blob));
+        setVideoSrc(response.data.url);
       } catch (error) {
-        console.error("Failed to load video:", error);
+        console.error("Failed to get signed video URL:", error);
       }
     };
 
-    fetchVideo();
-    return () => {
-      if (videoSrc) URL.revokeObjectURL(videoSrc);
-    };
+    fetchSignedUrl();
   }, [videoId]);
 
   return videoSrc ? (
     <video
       controls
+      onError={(e) => console.error("Video element error:", e)}
+      preload="metadata" 
       className="w-full rounded-md max-h-56 object-cover border border-gray-200"
       src={videoSrc}
     />

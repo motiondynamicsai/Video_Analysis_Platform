@@ -14,7 +14,7 @@ const SignUpScreen = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${API_BASE_URL}/auth/signup/`, {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/register`, {
         username: username.trim(),
         email: email.trim().toLowerCase(),
         password,

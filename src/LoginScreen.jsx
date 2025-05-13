@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Input, Form, Typography, message, Card } from "antd";
 import axios from "axios";
+import * as jwt_decode from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
@@ -16,18 +17,33 @@ const LoginScreen = ({ onLogin }) => {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${API_BASE_URL}/auth/login/`, {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email: email.trim().toLowerCase(),
         password,
       });
 
-      const { access_token, username } = response.data;
+      const { token: access_token, username } = response.data;
+
+
+      // Save token and username
       localStorage.setItem("access_token", access_token);
       localStorage.setItem("username", username);
-      onLogin(); // Notify App component about the login
-      navigate('/'); // Navigate to the home screen
+
+      // Decode user ID from JWT token
+      const decoded = jwt_decode.jwtDecode(access_token);
+      const userId = decoded.id || decoded.userId || decoded._id;
+      if (userId) {
+        localStorage.setItem("userId", userId);
+      } else {
+        console.warn("User ID not found in token:", decoded);
+      }
+
+      onLogin(); // Notify App
+      navigate("/"); // Redirect to home
     } catch (error) {
-      const detail = error.response?.data?.detail || "Unknown error";
+      console.error("Login error:", error.response);
+      const detail = error.response?.data?.detail || error.message || "Unknown error";
+
       message.error(`Login failed: ${detail}`);
     } finally {
       setLoading(false);
